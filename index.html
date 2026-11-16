@@ -2614,7 +2614,7 @@ window.Orcamento2027 = (() => {
   const PTAX_CURRENT = 5.56
   const MONTHS = Array.from({ length: 12 }, (_, i) => i + 1)
   const MONTH_NAMES = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"]
-  const COLORS = { history: "#003DA5", forecast: "#E6B800", grid: "#E6ECF5" }
+  const COLORS = { history: "#003DA5", forecast: "#E6B800", average: "#16803C", grid: "#E6ECF5" }
   const METRICS = [
     { id: "leite", name: "Leite Spot", unit: "R$/L", source: "Leite Spot (R$/lt)" },
     { id: "liquidoLitro", name: "Soro Líquido", unit: "R$/L", source: "Soro Líquido (R$/lt)" },
@@ -2753,24 +2753,71 @@ window.Orcamento2027 = (() => {
     return `<article class="budget-kpi"><div class="budget-kpi-name">${metric.name}</div><div class="budget-kpi-unit">${displayUnit(metric)}</div><div class="budget-kpi-actual">Atual <strong>${formatValue(actualValue, currency)}</strong><small>${actual ? formatPeriod(actual[0]) : "Sem dado"}</small></div><div class="budget-kpi-forecast">Média projetada 2027<strong>${formatValue(forecastAverage, currency)}</strong></div><span class="budget-chip ${tone}">${change}</span></article>`
   }
 
+  function chartUnit(metric) {
+    return metric.id === "leitePoDesnatado" && state.mode === "usd-current" ? "US$/t" : displayUnit(metric)
+  }
+
+  function chartValue(value, period, metric) {
+    const convertedValue = converted(value, period, state.mode)
+    return metric.id === "leitePoDesnatado" && state.mode === "usd-current" && convertedValue != null
+      ? convertedValue * 1000
+      : convertedValue
+  }
+
+  function chartTooltipValue(value, metric) {
+    const currency = state.mode === "brl" ? "BRL" : "USD"
+    const formatted = formatValue(value, currency)
+    return metric.id === "leitePoDesnatado" && state.mode === "usd-current" ? `${formatted}/t` : formatted
+  }
+
   function renderChart(canvasId, metric, series, forecast) {
     const canvas = document.getElementById(canvasId)
     if (!canvas || !window.Chart) return
     const actualRows = [...series.entries()].sort(([a], [b]) => a.localeCompare(b))
     const lastActual = actualRows.at(-1)?.[0]
     const labels = [...new Set([...actualRows.map(([period]) => period), ...forecast.values.keys()])].sort()
-    const historical = labels.map((period) => series.has(period) ? converted(series.get(period), period, state.mode) : null)
+    const historical = labels.map((period) => series.has(period) ? chartValue(series.get(period), period, metric) : null)
     const projected = labels.map((period) => {
-      if (period === lastActual) return converted(series.get(period), period, state.mode)
-      return forecast.values.has(period) ? converted(forecast.values.get(period), period, state.mode) : null
+      if (period === lastActual) return chartValue(series.get(period), period, metric)
+      return forecast.values.has(period) ? chartValue(forecast.values.get(period), period, metric) : null
     })
+    const observedValues = historical.filter((value) => value != null && Number.isFinite(value))
+    const average = observedValues.length ? observedValues.reduce((sum, value) => sum + value, 0) / observedValues.length : null
+    const averageLine = labels.map(() => average)
+    const datasets = [
+      { label: "Histórico real", data: historical, borderColor: COLORS.history, backgroundColor: COLORS.history, borderWidth: 2.4, pointRadius: 0, pointHitRadius: 6, tension: 0.22, spanGaps: false },
+      { label: "Projeção estatística", data: projected, borderColor: COLORS.forecast, backgroundColor: COLORS.forecast, borderWidth: 2.6, borderDash: [7, 5], pointRadius: (ctx) => ctx.raw == null ? 0 : 2, tension: 0.22, spanGaps: false },
+      { label: "Preço médio histórico", data: averageLine, borderColor: COLORS.average, backgroundColor: COLORS.average, borderWidth: 2, pointRadius: 0, tension: 0, spanGaps: false },
+    ]
+    if (metric.id === "leitePoDesnatado") {
+      datasets.push({
+        label: "Preço de compra · US$ 3.250/t",
+        data: labels.map((period) => {
+          if (period !== "2026-09") return null
+          if (state.mode === "usd-current") return 3250
+          const periodRate = state.ptaxByPeriod.get(period)
+          return periodRate ? 3.25 * periodRate : null
+        }),
+        borderColor: COLORS.average,
+        backgroundColor: COLORS.average,
+        pointBorderColor: "#fff",
+        pointBorderWidth: 2,
+        pointRadius: (context) => context.raw == null ? 0 : 6,
+        pointHoverRadius: 8,
+        showLine: false,
+      })
+    }
+    const skimPowderUsd = metric.id === "leitePoDesnatado" && state.mode === "usd-current"
+    const yScale = {
+      title: { display: true, text: skimPowderUsd ? "US$/t" : `${state.mode === "brl" ? "BRL" : "USD"} · ${chartUnit(metric)}` },
+      ticks: { callback: (value) => `${state.mode === "brl" ? "R$" : "US$"} ${Number(value).toLocaleString("pt-BR", { maximumFractionDigits: skimPowderUsd ? 0 : 2 })}` },
+    }
+    if (skimPowderUsd) yScale.min = 3100
+
     state.charts.push(new Chart(canvas, {
       type: "line",
-      data: { labels: labels.map(formatPeriod), datasets: [
-        { label: "Histórico real", data: historical, borderColor: COLORS.history, backgroundColor: COLORS.history, borderWidth: 2.4, pointRadius: 0, pointHitRadius: 6, tension: 0.22, spanGaps: false },
-        { label: "Projeção estatística", data: projected, borderColor: COLORS.forecast, backgroundColor: COLORS.forecast, borderWidth: 2.6, borderDash: [7, 5], pointRadius: (ctx) => ctx.raw == null ? 0 : 2, tension: 0.22, spanGaps: false },
-      ] },
-      options: { responsive: true, maintainAspectRatio: false, interaction: { mode: "index", intersect: false }, plugins: { legend: { position: "top", labels: { usePointStyle: true, boxWidth: 8 } }, tooltip: { callbacks: { label: (context) => `${context.dataset.label}: ${formatValue(context.parsed.y, state.mode === "brl" ? "BRL" : "USD")}` } } }, scales: { x: { grid: { display: false }, ticks: { maxTicksLimit: 12, maxRotation: 0 } }, y: { title: { display: true, text: `${state.mode === "brl" ? "BRL" : "USD"} · ${displayUnit(metric)}` }, ticks: { callback: (value) => `${state.mode === "brl" ? "R$" : "US$"} ${Number(value).toLocaleString("pt-BR", { maximumFractionDigits: 2 })}` } } } },
+      data: { labels: labels.map(formatPeriod), datasets },
+      options: { responsive: true, maintainAspectRatio: false, interaction: { mode: "index", intersect: false }, plugins: { legend: { position: "top", labels: { usePointStyle: true, boxWidth: 8 } }, tooltip: { callbacks: { label: (context) => `${context.dataset.label}: ${chartTooltipValue(context.parsed.y, metric)}` } } }, scales: { x: { grid: { display: false }, ticks: { maxTicksLimit: 12, maxRotation: 0 } }, y: yScale } },
     }))
   }
 
@@ -2799,7 +2846,7 @@ window.Orcamento2027 = (() => {
     const dataWarnings = METRICS.filter((metric) => !series.get(metric.id).size).map((metric) => `<li><strong>${metric.name}:</strong> não há histórico real na base; projeção não calculada.</li>`).join("")
     const noForecasts = METRICS.filter((metric) => forecasts[metric.id].values.size !== 12)
     const currency = state.mode === "brl" ? "BRL" : "USD"
-    host.innerHTML = `<div class="budget-toolbar"><div><strong>Orçamento 2027</strong><span>Valores projetados a partir do histórico observado</span></div><label for="budgetCurrency">Visualização</label><select id="budgetCurrency"><option value="brl" ${state.mode === "brl" ? "selected" : ""}>Reais (BRL)</option><option value="usd-current" ${state.mode === "usd-current" ? "selected" : ""}>USD · PTAX histórica / orçamento R$ 5,56</option></select></div><div class="budget-quote" role="status"><i class="fa-solid fa-circle-info"></i><span>${rateText}</span></div>${warnings || dataWarnings ? `<div class="budget-warning"><strong>Limitações metodológicas e de dados</strong><ul>${warnings}${dataWarnings}</ul></div>` : ""}${noForecasts.length ? `<div class="budget-warning"><strong>Não foi possível projetar todos os indicadores.</strong> A tabela mostra traços vazios para indicadores sem 12 meses previstos, em vez de completar valores sem base estatística.</div>` : ""}<div class="budget-kpis">${METRICS.map((metric) => cardMarkup(metric, series.get(metric.id), forecasts[metric.id])).join("")}</div><div class="budget-chart-grid">${METRICS.map((metric) => `<section class="panel budget-chart-card"><h3><i class="fa-solid fa-chart-line"></i>${metric.name}</h3><div class="p-sub">${displayUnit(metric)} · ${metric.source} · histórico real e projeção</div><div class="chart-wrap"><canvas id="budgetChart-${metric.id}" aria-label="Gráfico de ${metric.name}: histórico e projeção para 2027" role="img"></canvas></div></section>`).join("")}</div><section class="panel budget-section"><h3><i class="fa-solid fa-table"></i> Orçamento mensal · 2027</h3><div class="p-sub">Valores exatos usados nos gráficos; exibição em ${currency}</div>${renderTable(forecasts)}</section>`
+    host.innerHTML = `<div class="budget-toolbar"><div><strong>Orçamento 2027</strong><span>Valores projetados a partir do histórico observado</span></div><label for="budgetCurrency">Visualização</label><select id="budgetCurrency"><option value="brl" ${state.mode === "brl" ? "selected" : ""}>Reais (BRL)</option><option value="usd-current" ${state.mode === "usd-current" ? "selected" : ""}>USD · PTAX histórica / orçamento R$ 5,56</option></select></div><div class="budget-quote" role="status"><i class="fa-solid fa-circle-info"></i><span>${rateText}</span></div>${warnings || dataWarnings ? `<div class="budget-warning"><strong>Limitações metodológicas e de dados</strong><ul>${warnings}${dataWarnings}</ul></div>` : ""}${noForecasts.length ? `<div class="budget-warning"><strong>Não foi possível projetar todos os indicadores.</strong> A tabela mostra traços vazios para indicadores sem 12 meses previstos, em vez de completar valores sem base estatística.</div>` : ""}<div class="budget-kpis">${METRICS.map((metric) => cardMarkup(metric, series.get(metric.id), forecasts[metric.id])).join("")}</div><div class="budget-chart-grid">${METRICS.map((metric) => `<section class="panel budget-chart-card"><h3><i class="fa-solid fa-chart-line"></i>${metric.name}</h3><div class="p-sub">${chartUnit(metric)} · ${metric.source} · histórico real e projeção</div><div class="chart-wrap"><canvas id="budgetChart-${metric.id}" aria-label="Gráfico de ${metric.name}: histórico e projeção para 2027" role="img"></canvas></div></section>`).join("")}</div><section class="panel budget-section"><h3><i class="fa-solid fa-table"></i> Orçamento mensal · 2027</h3><div class="p-sub">Valores exatos usados nos gráficos; exibição em ${currency}</div>${renderTable(forecasts)}</section>`
 
     host.querySelector("#budgetCurrency").addEventListener("change", (event) => {
       state.mode = event.target.value
