@@ -464,31 +464,8 @@ tr:last-child td{border-bottom:none;}
 .var-grid.compact .vc-prev{display:none;}
 @media(max-width:1100px){.var-grid{grid-template-columns:repeat(2,1fr);}}
 
-/* ===== Precificação / Índices ===== */
-.idx-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:18px;}
-.idx-card{background:var(--card);border-radius:var(--raio);box-shadow:var(--sombra-sm);padding:18px;}
-.idx-card .i-lbl{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.4px;color:var(--texto-suave);display:flex;gap:8px;align-items:center;}
-.idx-card .i-lbl i{color:var(--azul);}
-.idx-card .i-val{font-size:32px;font-weight:900;color:var(--azul);margin:10px 0 2px;letter-spacing:-1px;line-height:1;}
-.idx-card .i-val small{font-size:14px;color:var(--texto-suave);font-weight:700;}
 .bar{height:8px;border-radius:6px;background:var(--linha);overflow:hidden;margin-top:10px;}
 .bar>i{display:block;height:100%;border-radius:6px;transition:width .4s;}
-.idx-tag{margin-top:9px;font-size:12px;font-weight:700;}
-.idx-foot{margin-top:6px;font-size:11px;color:var(--texto-suave);font-weight:600;}
-.preco-hero{background:linear-gradient(135deg,var(--azul),var(--azul-esc));color:#fff;border-radius:16px;padding:22px;text-align:center;}
-.preco-hero .ph-lbl{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.5px;color:var(--amarelo);}
-.preco-hero .ph-alvo{font-size:42px;font-weight:900;letter-spacing:-1.5px;margin-top:6px;}
-.preco-hero .ph-alvo small{font-size:15px;font-weight:600;opacity:.85;}
-.preco-hero .ph-ref{font-size:12.5px;font-weight:500;opacity:.85;margin-top:6px;}
-.preco-range{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:16px;}
-.preco-range .pr{background:var(--fundo);border-radius:12px;padding:12px;text-align:center;border:1px solid var(--linha);}
-.preco-range .pr b{display:block;font-size:20px;font-weight:900;color:var(--azul);}
-.preco-range .pr.alvo b{color:var(--amarelo-esc);}
-.preco-range .pr span{font-size:11px;color:var(--texto-suave);font-weight:700;text-transform:uppercase;letter-spacing:.4px;}
-.param-cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:18px;}
-.param-block h4{font-size:12px;font-weight:800;color:var(--azul);text-transform:uppercase;letter-spacing:.4px;margin-bottom:8px;}
-.param-row{display:flex;justify-content:space-between;font-size:12.5px;font-weight:600;padding:6px 0;border-bottom:1px dashed var(--linha);}
-.param-row span:last-child{font-weight:800;color:var(--texto);}
 
   .page{display:none;}
   .page.active{display:block;}
@@ -499,8 +476,8 @@ tr:last-child td{border-bottom:none;}
   .spot-finance-panel .chart-wrap canvas{background:#fff;color:#000;}
   @media(max-width:900px){.evolucao-chart{height:300px;min-height:300px;}}
 
-@media(max-width:1300px){.kpis,.idx-grid{grid-template-columns:repeat(2,1fr);}.g-3,.g-2b,.g-2,.g-2a{grid-template-columns:1fr;}}
-@media(max-width:900px){.sidebar{width:70px;padding:18px 10px;}.sidebar .logo-box{padding:8px;}.nav-item span{display:none;}.nav-item{justify-content:center;padding:13px 0;}.side-note{display:none;}.kpis,.idx-grid{grid-template-columns:1fr;}.main{padding:18px;}}
+@media(max-width:1300px){.kpis{grid-template-columns:repeat(2,1fr);}.g-3,.g-2b,.g-2,.g-2a{grid-template-columns:1fr;}}
+@media(max-width:900px){.sidebar{width:70px;padding:18px 10px;}.sidebar .logo-box{padding:8px;}.nav-item span{display:none;}.nav-item{justify-content:center;padding:13px 0;}.side-note{display:none;}.kpis{grid-template-columns:1fr;}.main{padding:18px;}}
 </style>
 </head>
 <body>
@@ -516,7 +493,6 @@ tr:last-child td{border-bottom:none;}
       <button class="nav-item" data-page="derivados"><i class="fa-solid fa-cheese"></i><span>Derivados</span></button>
            <button class="nav-item" data-page="captacao"><i class="fa-solid fa-droplet"></i><span>Captação</span></button>
       <button class="nav-item" data-page="custos"><i class="fa-solid fa-sack-dollar"></i><span>Custos</span></button>
-      <button class="nav-item" data-page="precificacao"><i class="fa-solid fa-calculator"></i><span>Precificação de Leite</span></button>
  <button class="nav-item" data-page="precificacao-soro"><i class="fa-solid fa-flask-vial"></i><span>Precificação de Soro</span></button>
  <button class="nav-item" data-page="saving"><i class="fa-solid fa-piggy-bank"></i><span>Saving</span></button>
 <button class="nav-item" data-page="orcamento-2027"><i class="fa-solid fa-chart-line"></i><span>Orçamento 2027</span></button>
@@ -649,28 +625,6 @@ tr:last-child td{border-bottom:none;}
         <h3><i class="fa-solid fa-sack-dollar"></i> Custos de Produção</h3>
           <div class="p-sub">Milho (R$/sc), Soja (R$/sc) e Petróleo (US$/barril)</div>
         <div class="chart-wrap xl"><canvas id="chCusto"></canvas></div>
-      </div>
-    </section>
-
-    <!-- ===================== PÁGINA: PRECIFICAÇÃO ===================== -->
-    <section class="page" id="page-precificacao">
-      <div class="idx-grid" id="idxGrid"></div>
-      <div class="grid g-2">
-        <div class="panel">
-          <h3><i class="fa-solid fa-bullseye"></i> Preço Sugerido de Compra</h3>
-          <div class="p-sub">Modelo multicritério · intervalo recomendado de negociação</div>
-          <div id="precoBox"></div>
-        </div>
-        <div class="panel">
-          <h3><i class="fa-solid fa-scale-unbalanced-flip"></i> Decomposição do Preço</h3>
-          <div class="p-sub">Fatores que puxaram o preço para cima ou para baixo</div>
-          <div style="overflow:auto;flex:1"><table id="tblFatores"></table></div>
-        </div>
-      </div>
-      <div class="panel" style="margin-top:18px">
-        <h3><i class="fa-solid fa-sliders"></i> Parâmetros do Modelo</h3>
-        <div class="p-sub">Pesos relativos — transparentes, reproduzíveis e ajustáveis</div>
-        <div class="param-cols" id="paramsBox"></div>
       </div>
     </section>
 
@@ -3369,7 +3323,6 @@ const PARAMS = {
   banda:{ min:0.01, max:0.02 }    // intervalo de negociação em torno do alvo
 };
 
-const PRESS_LABELS={spot:"Spot",conseleite:"Conseleite MG",concorrentes:"Concorrentes",industrial:"Mercado Industrial",custoProdutor:"Custo do Produtor",captacao:"Captação",oferta:"Oferta"};
 const NAMES=["periodo","spot","cepea","conseleite","uht","mucarela","creme","lpi","lpd","milho","soja","manteiga200","manteigaExtra","produtores","volume","tend","oferta","petroleo"];
 
 let DATA=JSON.parse(JSON.stringify(BASE));
@@ -3560,14 +3513,6 @@ function calcIndices(){
   };
   let pressao=0; for(const k in PARAMS.pressao) pressao+=PARAMS.pressao[k]*sub[k];
   return {pressao:r1(pressao),competitividade:r1(competitividade),custo:r1(custo),industrial:r1(industrial),sub,diff,moc,mc};
-}
-
-/* ===== Tendência do custo (mensal, trimestral, anual) ===== */
-function tendenciaCusto(){
-  const rows=allRows(); const cc=(r)=>r? (r.milho*PARAMS.custo.milho + r.soja*PARAMS.custo.soja + (r.petroleo||0)*(PARAMS.custo.petroleo||0)):null;
-  const n=rows.length-1; const at=cc(rows[n]);
-  const varr=(k)=>{const b=rows[n-k];return (b&&cc(b))?(at-cc(b))/cc(b):null;};
-  return {mensal:varr(1),trimestral:varr(3),anual:varr(12)};
 }
 
 function calcPreco(){
@@ -3849,74 +3794,6 @@ function tabelaConc(id){
     <div class="mini"><div class="m-l">Oferta de mercado</div><div class="m-v" style="font-size:14px">${u.oferta}</div></div>`;
 }
 
-/* ============================================================ PRECIFICAÇÃO ============================================================ */
-function idxCor(v){return v>=70?VERDE_ESC:v>=45?AZUL:AMARELO;}
-function idxTag(v){return v>=70?"Elevado":v>=45?"Moderado":"Baixo";}
-function renderIndices(){
-  const P=calcPreco();const idx=P.idx;const tc=tendenciaCusto();
-  const cards=[
-    {ic:"fa-gauge-high",lbl:"Pressão de Compra",v:idx.pressao,foot:"Dificuldade prevista de aquisição no próximo mês"},
-    {ic:"fa-scale-balanced",lbl:"Competitividade",v:idx.competitividade,foot:(idx.diff<0?"Abaixo":"Acima")+" da média do mercado ("+pct(idx.diff)+")"},
-    {ic:"fa-tractor",lbl:"Custo do Produtor",v:idx.custo,foot:`Mês ${pct(tc.mensal)} · Trim ${pct(tc.trimestral)} · Ano ${pct(tc.anual)}`},
-    {ic:"fa-industry",lbl:"Mercado Industrial",v:idx.industrial,foot:"Rentabilidade potencial via derivados"}
-  ];
-  document.getElementById("idxGrid").innerHTML=cards.map(c=>`
-    <div class="idx-card">
-      <div class="i-lbl"><i class="fa-solid ${c.ic}"></i> ${c.lbl}</div>
-      <div class="i-val">${fmt(c.v,0)} <small>/100</small></div>
-      <div class="bar"><i style="width:${c.v}%;background:${idxCor(c.v)}"></i></div>
-      <div class="idx-tag" style="color:${idxCor(c.v)}">${idxTag(c.v)}</div>
-      <div class="idx-foot">${c.foot}</div>
-    </div>`).join("");
-
-  // Preço sugerido + intervalo
-  document.getElementById("precoBox").innerHTML=`
-    <div class="preco-hero">
-      <div class="ph-lbl">Preço-alvo sugerido</div>
-      <div class="ph-alvo">R$ ${fmt(P.alvo)} <small>/ litro</small></div>
-      <div class="ph-ref">Referência de mercado: R$ ${fmt(P.precoRef)} · Ajuste do modelo: ${(P.aj>=0?"+":"")}${(P.aj*100).toFixed(2).replace(".",",")}%</div>
-    </div>
-    <div class="preco-range">
-      <div class="pr"><span>Mínimo</span><b>R$ ${fmt(P.min)}</b></div>
-      <div class="pr alvo"><span>Alvo</span><b>R$ ${fmt(P.alvo)}</b></div>
-      <div class="pr"><span>Máximo</span><b>R$ ${fmt(P.max)}</b></div>
-    </div>
-    <p style="font-size:12.5px;color:var(--texto-suave);font-weight:500;line-height:1.5;margin-top:14px">
-      O preço parte de um <b>blend multicritério</b> das referências de mercado (Conseleite, Spot, concorrentes e preço atual)
-      e é ajustado pelos quatro índices. Nenhum valor usa média simples.
-    </p>`;
-
-  // Decomposição dos fatores
-  const fatores=[
-    {nome:"Pressão de Compra",v:idx.pressao,c:P.contrib.pressao,desc:"Dificuldade de aquisição"},
-    {nome:"Competitividade",v:idx.competitividade,c:P.contrib.competitividade,desc:"Posição vs. concorrentes"},
-    {nome:"Custo do Produtor",v:idx.custo,c:P.contrib.custo,desc:"Milho, soja e petróleo"},
-    {nome:"Mercado Industrial",v:idx.industrial,c:P.contrib.industrial,desc:"Rentabilidade dos derivados"}
-  ];
-  let html=`<thead><tr><th>Fator</th><th>Índice</th><th>Efeito</th><th>Impacto no preço</th></tr></thead><tbody>`;
-  fatores.forEach(f=>{const up=f.c>=0;const rs=P.precoRef*f.c;
-    html+=`<tr><td><b>${f.nome}</b><div style="font-size:11px;color:var(--texto-suave);font-weight:500">${f.desc}</div></td>
-      <td>${fmt(f.v,0)}/100</td>
-      <td class="${up?'pos':'neg'}"><i class="fa-solid fa-arrow-${up?'up':'down'}"></i> ${up?'Puxa para cima':'Puxa para baixo'}</td>
-      <td class="${up?'pos':'neg'}">${up?'+':''}R$ ${fmt(rs,3)}</td></tr>`;});
-  html+=`<tr style="border-top:2px solid var(--linha)"><td><b>Ajuste líquido</b></td><td>—</td>
-    <td class="${P.aj>=0?'pos':'neg'}">${(P.aj>=0?"+":"")}${(P.aj*100).toFixed(2).replace(".",",")}%</td>
-    <td class="${P.aj>=0?'pos':'neg'}"><b>${P.aj>=0?'+':''}R$ ${fmt(P.alvo-P.precoRef,3)}</b></td></tr></tbody>`;
-  document.getElementById("tblFatores").innerHTML=html;
-
-  // Parâmetros do modelo (transparência)
-  const blocos=[
-    {t:"Preço de referência",obj:PARAMS.referencia,map:{conseleite:"Conseleite",spot:"Spot",concorrentes:"Concorrentes",mococaAtual:"Preço atual Mococa"}},
-    {t:"Pressão de Compra",obj:PARAMS.pressao,map:PRESS_LABELS},
-    {t:"Mercado Industrial",obj:PARAMS.industrial,map:{uht:"UHT",mucarela:"Muçarela",creme:"Creme",lpi:"LPI",lpd:"LPD"}},
-    {t:"Custo do Produtor",obj:PARAMS.custo,map:{milho:"Milho",soja:"Soja",petroleo:"Petróleo"}}
-  ];
-  document.getElementById("paramsBox").innerHTML=blocos.map(b=>`
-    <div class="param-block"><h4>${b.t}</h4>
-      ${Object.entries(b.obj).map(([k,v])=>`<div class="param-row"><span>${b.map[k]||k}</span><span>${Math.round(v*100)}%</span></div>`).join("")}
-    </div>`).join("");
-}
-
 /* ============================================================ NAVEGAÇÃO ============================================================ */
 const PAGES={
   geral:{title:"Painel de Leite",sub:"Política de Compra de Leite · Visão Geral",render(){
@@ -3929,7 +3806,6 @@ const PAGES={
   captacao:{title:"Captação de Leite",sub:"Produtores ativos, volume captado e preços pagos ao produtor",render(){
   captStats("captStats");areaProdutores("chArea");volumeBar("chVol");precoProdutorChart();}},
   custos:{title:"Custos de Produção",sub:"Preços de milho, soja (R$/saca) e petróleo (US$/barril)",render(){custoChart();}},
-  precificacao:{title:"Sugestão de Preço de Compra",sub:"Modelo multicritério · índices e preço sugerido",render(){renderIndices();}},
   "precificacao-soro":{title:"Precificação de Soro",sub:"Mercado, preço pago e impacto da concentração de sólidos",render(){SoroPricing.init();}},
   saving:{title:"Saving",sub:"Análise gerencial de resultados de compras e suprimentos",render(){renderSaving();}},
   "orcamento-2027":{title:"Orçamento 2027",sub:"Projeções estatísticas de preços para planejamento financeiro",render(){Orcamento2027.init();}},
